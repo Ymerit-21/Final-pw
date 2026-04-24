@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Platform, Alert } from 'react-native';
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithCredential, signInWithPopup, User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import Constants from 'expo-constants';
@@ -44,6 +44,40 @@ export function useGoogleAuth() {
     }
   }, [isExpoGo]);
 
+  const syncUserToFirestore = async (user: User) => {
+    const profileInfo = {
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      picture: user.photoURL,
+    };
+
+    // 4. Check Firestore (Users Database)
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+      await setDoc(userDocRef, {
+        email: profileInfo.email,
+        name: profileInfo.name,
+        profilePicture: profileInfo.picture,
+        createdAt: new Date().toISOString(),
+        onboardingCompleted: false
+      });
+      console.log('Created new user profile in Firestore');
+      router.replace('/onboarding');
+    } else {
+      const data = userDocSnap.data();
+      if (data.onboardingCompleted) {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/onboarding');
+      }
+    }
+
+    setUserInfo(profileInfo);
+  };
+
   const authenticateWithFirebase = async (idToken: string) => {
     try {
       // 2. Create a Firebase credential using the native Google ID token
@@ -51,39 +85,8 @@ export function useGoogleAuth() {
 
       // 3. Sign in to Firebase Auth
       const userCredential = await signInWithCredential(auth, credential);
-      const user = userCredential.user;
-
-      const profileInfo = {
-        uid: user.uid,
-        name: user.displayName,
-        email: user.email,
-        picture: user.photoURL,
-      };
-
-      // 4. Check Firestore (Users Database)
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (!userDocSnap.exists()) {
-        await setDoc(userDocRef, {
-          email: profileInfo.email,
-          name: profileInfo.name,
-          profilePicture: profileInfo.picture,
-          createdAt: new Date().toISOString(),
-          onboardingCompleted: false
-        });
-        console.log('Created new user profile in Firestore');
-        router.replace('/onboarding');
-      } else {
-        const data = userDocSnap.data();
-        if (data.onboardingCompleted) {
-          router.replace('/dashboard');
-        } else {
-          router.replace('/onboarding');
-        }
-      }
-
-      setUserInfo(profileInfo);
+      
+      await syncUserToFirestore(userCredential.user);
     } catch (error) {
       console.error('Error securely logging into Firebase:', error);
       throw error;
@@ -100,27 +103,35 @@ export function useGoogleAuth() {
       return;
     }
 
-    if (!GoogleSignin) {
-      console.error('GoogleSignin is not initialized');
-      return;
-    }
-
     setLoading(true);
     try {
-      // Check if user has Google Play Services (Android only)
-      if (Platform.OS === 'android') {
-        await GoogleSignin.hasPlayServices();
-      }
-      
-      // Native Sign In
-      const response = await GoogleSignin.signIn();
-      const idToken = response.data?.idToken;
+      if (Platform.OS === 'web') {
+        // --- Web Implementation ---
+        const provider = new GoogleAuthProvider();
+        const userCredential = await signInWithPopup(auth, provider);
+        await syncUserToFirestore(userCredential.user);
+      } else {
+        // --- Native Mobile Implementation ---
+        if (!GoogleSignin) {
+          console.error('GoogleSignin is not initialized');
+          return;
+        }
 
-      if (!idToken) {
-        throw new Error('No ID Token received from Google');
-      }
+        // Check if user has Google Play Services (Android only)
+        if (Platform.OS === 'android') {
+          await GoogleSignin.hasPlayServices();
+        }
+        
+        // Native Sign In
+        const response = await GoogleSignin.signIn();
+        const idToken = response.data?.idToken;
 
-      await authenticateWithFirebase(idToken);
+        if (!idToken) {
+          throw new Error('No ID Token received from Google');
+        }
+
+        await authenticateWithFirebase(idToken);
+      }
     } catch (error: any) {
       if (statusCodes && error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log('User cancelled the login flow');
@@ -128,6 +139,10 @@ export function useGoogleAuth() {
         console.log('Sign in is already in progress');
       } else if (statusCodes && error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         console.log('Play services not available or outdated');
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        console.log('User closed the Google Sign-In popup');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        Alert.alert('Authentication Failed', 'Your Netlify domain is not authorized in Firebase. Please add it to your Firebase Console settings.', [{ text: 'OK' }]);
       } else {
         console.error('Google Sign-In Error:', error);
       }
