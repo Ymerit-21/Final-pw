@@ -142,8 +142,15 @@ export function useGoogleAuth() {
       } else if (error.code === 'auth/popup-closed-by-user') {
         console.log('User closed the Google Sign-In popup');
       } else if (error.code === 'auth/unauthorized-domain') {
-        Alert.alert('Authentication Failed', 'Your Netlify domain is not authorized in Firebase. Please add it to your Firebase Console settings.', [{ text: 'OK' }]);
+        if (Platform.OS === 'web') {
+          alert('Authentication Failed: Your Netlify domain is not authorized in Firebase. Please add it exactly as it appears in your URL bar (without https://) to your Firebase Console settings.');
+        } else {
+          Alert.alert('Authentication Failed', 'Your Netlify domain is not authorized in Firebase. Please add it to your Firebase Console settings.', [{ text: 'OK' }]);
+        }
       } else {
+        if (Platform.OS === 'web') {
+          alert(`Google Sign-In Error: ${error.message}`);
+        }
         console.error('Google Sign-In Error:', error);
       }
     } finally {
