@@ -232,23 +232,36 @@ export default function DashboardScreen() {
     };
   }, [auth.currentUser]);
 
-  const masterLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to sign out?", [
-      { text: "Cancel", style: "cancel" },
-      { 
-        text: "Log Out", 
-        style: "destructive",
-        onPress: async () => {
-          try {
-            clearAllListeners();
-            await signOut(auth);
-          } catch (error) {
-            resetSession();
-            Alert.alert("Error", "Failed to sign out.");
-          }
-        } 
+  const masterLogout = async () => {
+    if (Platform.OS === 'web') {
+      const confirmLogout = window.confirm('Are you sure you want to sign out?');
+      if (confirmLogout) {
+        try {
+          clearAllListeners();
+          await signOut(auth);
+        } catch (error) {
+          resetSession();
+          alert('Failed to sign out.');
+        }
       }
-    ]);
+    } else {
+      Alert.alert("Logout", "Are you sure you want to sign out?", [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Log Out", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              clearAllListeners();
+              await signOut(auth);
+            } catch (error) {
+              resetSession();
+              Alert.alert("Error", "Failed to sign out.");
+            }
+          } 
+        }
+      ]);
+    }
   };
 
   const budgetPercent = userData.budgetGoal > 0 

@@ -63,22 +63,35 @@ export default function ProfileScreen() {
   }, [auth.currentUser]);
 
   // ─── Handlers ───────────────────────────────────────────────────
-  const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log Out', style: 'destructive',
-        onPress: async () => {
-          try {
-            clearAllListeners();
-            await signOut(auth);
-          } catch {
-            resetSession();
-            Alert.alert('Error', 'Failed to sign out.'); 
-          }
+  const handleLogout = async () => {
+    if (Platform.OS === 'web') {
+      const confirmLogout = window.confirm('Are you sure you want to log out?');
+      if (confirmLogout) {
+        try {
+          clearAllListeners();
+          await signOut(auth);
+        } catch {
+          resetSession();
+          alert('Failed to sign out.');
         }
       }
-    ]);
+    } else {
+      Alert.alert('Sign Out', 'Are you sure you want to log out?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out', style: 'destructive',
+          onPress: async () => {
+            try {
+              clearAllListeners();
+              await signOut(auth);
+            } catch {
+              resetSession();
+              Alert.alert('Error', 'Failed to sign out.'); 
+            }
+          }
+        }
+      ]);
+    }
   };
 
   const handleSaveName = async () => {
