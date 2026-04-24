@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, TouchableOpacity, 
-  Image, ActivityIndicator, Alert, Dimensions
+  Image, ActivityIndicator, Alert, Dimensions, Platform
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -96,62 +96,81 @@ export default function ExpertDetailScreen() {
 
   const handleBooking = async () => {
     if (!auth.currentUser || !profile) {
-      Alert.alert("Auth Required", "Please sign in to book an expert.");
+      if (Platform.OS === 'web') {
+        window.alert("Auth Required: Please sign in to book an expert.");
+      } else {
+        Alert.alert("Auth Required", "Please sign in to book an expert.");
+      }
       return;
     }
 
-    Alert.alert(
-      "Confirm Request",
-      `Send a job request to ${profile.name.split(' ')[0]} for ₵${profile.basePrice || 150}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Send Request", 
-          onPress: async () => {
-            const user = auth.currentUser;
-            if (!user) return;
+    const executeBooking = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
 
-            try {
-              setLoading(true);
-              const currentUserId = user.uid;
-              
-              // 1. Create the Job record
-              const jobRef = await addDoc(collection(db, 'jobs'), {
-                studentId: currentUserId,
-                expertId: profile.id,
-                status: 'pending',
-                trade: profile.trade,
-                price: profile.basePrice || 150, // Use expert's base price
-                createdAt: serverTimestamp(),
-                studentName: user.displayName || 'Student',
-                expertName: profile.name,
-              });
+      try {
+        setLoading(true);
+        const currentUserId = user.uid;
+        
+        // 1. Create the Job record
+        const jobRef = await addDoc(collection(db, 'jobs'), {
+          studentId: currentUserId,
+          expertId: profile.id,
+          status: 'pending',
+          trade: profile.trade,
+          price: profile.basePrice || 150, // Use expert's base price
+          createdAt: serverTimestamp(),
+          studentName: user.displayName || 'Student',
+          expertName: profile.name,
+        });
 
-              // 2. Notify the Expert
-              await addDoc(collection(db, 'users', profile.id, 'notifications'), {
-                type: 'job',
-                title: 'New Job Request! 🛠️',
-                body: `${user.displayName || 'A student'} wants to hire you for ${profile.trade}.`,
-                jobId: jobRef.id,
-                read: false,
-                createdAt: serverTimestamp(),
-              });
+        // 2. Notify the Expert
+        await addDoc(collection(db, 'users', profile.id, 'notifications'), {
+          type: 'job',
+          title: 'New Job Request! 🛠️',
+          body: `${user.displayName || 'A student'} wants to hire you for ${profile.trade}.`,
+          jobId: jobRef.id,
+          read: false,
+          createdAt: serverTimestamp(),
+        });
 
-              Alert.alert(
-                "Request Sent!", 
-                `${profile.name} has been notified. You can track this in your Jobs tab soon.`,
-                [{ text: "OK", onPress: () => router.push('/dashboard') }]
-              );
-            } catch (err) {
-              console.error("Booking Error:", err);
-              Alert.alert("Error", "Failed to send booking request.");
-            } finally {
-              setLoading(false);
-            }
-          }
+        if (Platform.OS === 'web') {
+          window.alert(`Request Sent! ${profile.name} has been notified. You can track this in your Jobs tab soon.`);
+          router.push('/dashboard');
+        } else {
+          Alert.alert(
+            "Request Sent!", 
+            `${profile.name} has been notified. You can track this in your Jobs tab soon.`,
+            [{ text: "OK", onPress: () => router.push('/dashboard') }]
+          );
         }
-      ]
-    );
+      } catch (err) {
+        console.error("Booking Error:", err);
+        if (Platform.OS === 'web') {
+          window.alert("Error: Failed to send booking request.");
+        } else {
+          Alert.alert("Error", "Failed to send booking request.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Send a job request to ${profile.name.split(' ')[0]} for ₵${profile.basePrice || 150}?`);
+      if (confirm) {
+        executeBooking();
+      }
+    } else {
+      Alert.alert(
+        "Confirm Request",
+        `Send a job request to ${profile.name.split(' ')[0]} for ₵${profile.basePrice || 150}?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Send Request", onPress: executeBooking }
+        ]
+      );
+    }
   };
 
   const handleMessage = async () => {
