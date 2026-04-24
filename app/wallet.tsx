@@ -304,6 +304,7 @@ export default function WalletScreen() {
     color: b.color || '#000',
     legendFontColor: '#7F7F7F',
     legendFontSize: 12,
+    legendFontFamily: 'Inter_400Regular',
   })).filter(b => b.amount > 0);
 
   // Generate Line Chart Data (Last 5 Days)
@@ -445,7 +446,8 @@ export default function WalletScreen() {
                           color: (opacity = 1) => theme.text,
                           labelColor: (opacity = 1) => theme.subtext,
                           style: { borderRadius: 16 },
-                          propsForDots: { r: "4", strokeWidth: "2", stroke: theme.card }
+                          propsForDots: { r: "4", strokeWidth: "2", stroke: theme.card },
+                          propsForLabels: { fontFamily: 'Inter_400Regular', fontSize: 11 }
                         }}
                         bezier
                         style={{ marginVertical: 8, borderRadius: 16 }}
@@ -469,6 +471,7 @@ export default function WalletScreen() {
                           color: (opacity = 1) => isDark ? `rgba(217, 241, 93, ${opacity})` : `rgba(0, 0, 0, ${opacity})`,
                           labelColor: (opacity = 1) => theme.subtext,
                           style: { borderRadius: 16 },
+                          propsForLabels: { fontFamily: 'Inter_400Regular', fontSize: 11 }
                         }}
                         style={{ marginVertical: 8, borderRadius: 16 }}
                         showValuesOnTopOfBars
