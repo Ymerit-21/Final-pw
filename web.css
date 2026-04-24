@@ -256,3 +256,7 @@ h1, h2, h3, .font-rounded {
 div[dir="auto"], span[dir="auto"] {
   font-family: 'Inter', sans-serif;
 }
+
+div[style*="KodeMono"], span[style*="KodeMono"] {
+  font-family: 'Kode Mono', monospace !important;
+}
