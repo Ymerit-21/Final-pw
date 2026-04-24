@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,59,48,0.2)'
   },
   premiumLogoutText: { 
-    fontFamily: 'Inter_700Bold', 
+    fontFamily: 'KodeMono_700Bold', 
     fontSize: 16, 
     color: '#FF3B30' 
   },
