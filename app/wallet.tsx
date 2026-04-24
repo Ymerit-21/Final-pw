@@ -12,8 +12,9 @@ import { doc, onSnapshot, collection, query, orderBy, limit, addDoc, serverTimes
 import { Stack, useRouter } from 'expo-router';
 import { Shimmer, GoalSkeleton } from '../components/Shimmer';
 import { LinearGradient } from 'expo-linear-gradient';
-import { PieChart } from 'react-native-chart-kit';
+import { PieChart, LineChart, BarChart } from 'react-native-chart-kit';
 import { useTheme } from '../context/ThemeContext';
+import { useMemo } from 'react';
 
 const { width } = Dimensions.get('window');
 
@@ -305,6 +306,64 @@ export default function WalletScreen() {
     legendFontSize: 12,
   })).filter(b => b.amount > 0);
 
+  // Generate Line Chart Data (Last 5 Days)
+  const last5Days = useMemo(() => {
+    const dates = [];
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      dates.push(d.toISOString().split('T')[0]);
+    }
+    return dates;
+  }, []);
+
+  const lineChartData = useMemo(() => {
+    const incomeData = last5Days.map(date => {
+      return transactions
+        .filter(t => t.date === date && (t.type === 'income' || t.type === 'credit'))
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
+    });
+    
+    const expenseData = last5Days.map(date => {
+      return transactions
+        .filter(t => t.date === date && (t.type === 'expense' || t.type === 'debit'))
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
+    });
+
+    const labels = last5Days.map(d => {
+      const parts = d.split('-');
+      return `${parts[1]}/${parts[2]}`;
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          data: incomeData.length > 0 && incomeData.some(d => d > 0) ? incomeData : [0,0,0,0,0],
+          color: (opacity = 1) => `rgba(50, 215, 75, ${opacity})`,
+          strokeWidth: 3,
+        },
+        {
+          data: expenseData.length > 0 && expenseData.some(d => d > 0) ? expenseData : [0,0,0,0,0],
+          color: (opacity = 1) => `rgba(255, 59, 48, ${opacity})`,
+          strokeWidth: 3,
+        }
+      ],
+      legend: ["Income", "Expenses"]
+    };
+  }, [transactions, last5Days]);
+
+  const barChartData = useMemo(() => {
+    const sortedBudgets = [...budgets].sort((a, b) => (b.spent || 0) - (a.spent || 0)).slice(0, 5);
+    const labels = sortedBudgets.length > 0 ? sortedBudgets.map(b => b.name.substring(0, 6) + (b.name.length > 6 ? '..' : '')) : ['None'];
+    const data = sortedBudgets.length > 0 ? sortedBudgets.map(b => b.spent || 0) : [0];
+
+    return {
+      labels,
+      datasets: [{ data }]
+    };
+  }, [budgets]);
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
@@ -363,30 +422,82 @@ export default function WalletScreen() {
           </LinearGradient>
         </Animated.View>
 
-        {/* 2. Spending Overview */}
+        {/* 2. Analytics Dashboard */}
         <Animated.View entering={FadeInUp.delay(200)} style={styles.cardSection}>
             <View style={styles.sectionRow}>
-                <Text style={[styles.sectionTitle, { color: theme.text }]}>Spending Overview</Text>
+                <Text style={[styles.sectionTitle, { color: theme.text }]}>Analytics Dashboard</Text>
             </View>
-            {pieData.length > 0 ? (
-                <View style={[styles.chartContainer, { backgroundColor: theme.card, shadowColor: isDark ? '#000' : '#000', shadowOpacity: isDark ? 0.3 : 0.05 }]}>
-                    <PieChart
-                        data={pieData}
-                        width={width - 40}
-                        height={200}
+            
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 15 }}>
+                
+                {/* Line Chart: Cash Flow */}
+                <View style={[styles.chartContainer, { backgroundColor: theme.card, shadowColor: isDark ? '#000' : '#000', shadowOpacity: isDark ? 0.3 : 0.05, width: width - 40 }]}>
+                    <Text style={{fontFamily: 'Inter_700Bold', color: theme.text, fontSize: 14, marginBottom: 15, alignSelf: 'flex-start'}}>Cash Flow (Last 5 Days)</Text>
+                    <LineChart
+                        data={lineChartData}
+                        width={width - 70}
+                        height={220}
                         chartConfig={{
-                          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                          backgroundColor: theme.card,
+                          backgroundGradientFrom: theme.card,
+                          backgroundGradientTo: theme.card,
+                          decimalPlaces: 0,
+                          color: (opacity = 1) => theme.text,
+                          labelColor: (opacity = 1) => theme.subtext,
+                          style: { borderRadius: 16 },
+                          propsForDots: { r: "4", strokeWidth: "2", stroke: theme.card }
                         }}
-                        accessor={"amount"}
-                        backgroundColor={"transparent"}
-                        paddingLeft={"15"}
-                        center={[0, 0]}
-                        absolute
+                        bezier
+                        style={{ marginVertical: 8, borderRadius: 16 }}
                     />
                 </View>
-            ) : (
-                <Text style={[styles.emptyText, { color: theme.subtext }]}>No spending data available. Add expenses to see your pie chart.</Text>
-            )}
+
+                {/* Bar Chart: Spending by Category */}
+                <View style={[styles.chartContainer, { backgroundColor: theme.card, shadowColor: isDark ? '#000' : '#000', shadowOpacity: isDark ? 0.3 : 0.05, width: width - 40 }]}>
+                    <Text style={{fontFamily: 'Inter_700Bold', color: theme.text, fontSize: 14, marginBottom: 15, alignSelf: 'flex-start'}}>Top Spending Categories</Text>
+                    <BarChart
+                        data={barChartData}
+                        width={width - 70}
+                        height={220}
+                        yAxisLabel="₵"
+                        yAxisSuffix=""
+                        chartConfig={{
+                          backgroundColor: theme.card,
+                          backgroundGradientFrom: theme.card,
+                          backgroundGradientTo: theme.card,
+                          decimalPlaces: 0,
+                          color: (opacity = 1) => isDark ? `rgba(217, 241, 93, ${opacity})` : `rgba(0, 0, 0, ${opacity})`,
+                          labelColor: (opacity = 1) => theme.subtext,
+                          style: { borderRadius: 16 },
+                        }}
+                        style={{ marginVertical: 8, borderRadius: 16 }}
+                        showValuesOnTopOfBars
+                    />
+                </View>
+                
+                {/* Pie Chart: Spending Distribution */}
+                <View style={[styles.chartContainer, { backgroundColor: theme.card, shadowColor: isDark ? '#000' : '#000', shadowOpacity: isDark ? 0.3 : 0.05, width: width - 40 }]}>
+                    <Text style={{fontFamily: 'Inter_700Bold', color: theme.text, fontSize: 14, marginBottom: 15, alignSelf: 'flex-start'}}>Spending Distribution</Text>
+                    {pieData.length > 0 ? (
+                        <PieChart
+                            data={pieData}
+                            width={width - 70}
+                            height={200}
+                            chartConfig={{
+                              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                            }}
+                            accessor={"amount"}
+                            backgroundColor={"transparent"}
+                            paddingLeft={"15"}
+                            center={[0, 0]}
+                            absolute
+                        />
+                    ) : (
+                        <Text style={[styles.emptyText, { color: theme.subtext, alignSelf: 'center', marginTop: 50 }]}>No spending data available.</Text>
+                    )}
+                </View>
+
+            </ScrollView>
         </Animated.View>
 
         {/* Milestones Section */}
