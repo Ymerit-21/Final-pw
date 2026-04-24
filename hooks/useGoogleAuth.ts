@@ -1,46 +1,55 @@
 import * as React from 'react';
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
+import { Platform, Alert } from 'react-native';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
+import Constants from 'expo-constants';
 
-// Ensures that auth session can be completed properly on web environments
-WebBrowser.maybeCompleteAuthSession();
+// We will load these lazily to prevent Expo Go from crashing on boot
+let GoogleSignin: any = null;
+let statusCodes: any = null;
 
+/**
+ * Professional Native Google Authentication Hook
+ * Uses @react-native-google-signin/google-signin for production-grade reliability
+ */
 export function useGoogleAuth() {
   const router = useRouter();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  // Configuration for Google Auth
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: '157569495495-dqslqhcrnhmeipfiusdtsjelanudrk4u.apps.googleusercontent.com',
-    androidClientId: 'YOUR_ANDROID_CLIENT_ID_HERE.apps.googleusercontent.com',
-    iosClientId: '157569495495-fou5e3inrqemsnhduhen9c77frbn2moj.apps.googleusercontent.com',
-  });
+  // Check if we are running in Expo Go
+  const isExpoGo = Constants.appOwnership === 'expo';
 
   useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      if (authentication?.accessToken || authentication?.idToken) {
-        authenticateWithFirebase(
-          authentication?.idToken ?? undefined, 
-          authentication?.accessToken
-        );
+    // 1. Initial Configure - Only run if NOT in Expo Go
+    if (!isExpoGo) {
+      try {
+        // Lazy load the native module
+        const GoogleModule = require('@react-native-google-signin/google-signin');
+        GoogleSignin = GoogleModule.GoogleSignin;
+        statusCodes = GoogleModule.statusCodes;
+
+        GoogleSignin.configure({
+          webClientId: '703560838714-4d5bn58dvafkvj5skva9i3brfgrrf2qv.apps.googleusercontent.com',
+          offlineAccess: true,
+        });
+      } catch (e) {
+        console.warn('GoogleSignin initialization failed:', e);
       }
+    } else {
+      console.warn('Google Sign-In is disabled in Expo Go. Use a Development Build to test this feature.');
     }
-  }, [response]);
+  }, [isExpoGo]);
 
-  const authenticateWithFirebase = async (idToken: string | undefined, accessToken: string | undefined) => {
-    setLoading(true);
+  const authenticateWithFirebase = async (idToken: string) => {
     try {
-      // 1. Create a Firebase credential using the Google access token
-      const credential = GoogleAuthProvider.credential(idToken, accessToken);
+      // 2. Create a Firebase credential using the native Google ID token
+      const credential = GoogleAuthProvider.credential(idToken);
 
-      // 2. Sign in to Firebase Auth
+      // 3. Sign in to Firebase Auth
       const userCredential = await signInWithCredential(auth, credential);
       const user = userCredential.user;
 
@@ -51,7 +60,7 @@ export function useGoogleAuth() {
         picture: user.photoURL,
       };
 
-      // 3. Check Firestore (Users Database)
+      // 4. Check Firestore (Users Database)
       const userDocRef = doc(db, 'users', user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
@@ -61,6 +70,7 @@ export function useGoogleAuth() {
           name: profileInfo.name,
           profilePicture: profileInfo.picture,
           createdAt: new Date().toISOString(),
+          onboardingCompleted: false
         });
         console.log('Created new user profile in Firestore');
         router.replace('/onboarding');
@@ -76,16 +86,55 @@ export function useGoogleAuth() {
       setUserInfo(profileInfo);
     } catch (error) {
       console.error('Error securely logging into Firebase:', error);
+      throw error;
+    }
+  };
+
+  const signIn = async () => {
+    if (isExpoGo) {
+      Alert.alert(
+        'Feature Unavailable',
+        'Google Sign-In requires a custom Development Build. It is not supported in the standard Expo Go app. You can use Email/Password sign-in to continue testing.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    if (!GoogleSignin) {
+      console.error('GoogleSignin is not initialized');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Check if user has Google Play Services (Android only)
+      if (Platform.OS === 'android') {
+        await GoogleSignin.hasPlayServices();
+      }
+      
+      // Native Sign In
+      const response = await GoogleSignin.signIn();
+      const idToken = response.data?.idToken;
+
+      if (!idToken) {
+        throw new Error('No ID Token received from Google');
+      }
+
+      await authenticateWithFirebase(idToken);
+    } catch (error: any) {
+      if (statusCodes && error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log('User cancelled the login flow');
+      } else if (statusCodes && error.code === statusCodes.IN_PROGRESS) {
+        console.log('Sign in is already in progress');
+      } else if (statusCodes && error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('Play services not available or outdated');
+      } else {
+        console.error('Google Sign-In Error:', error);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const signIn = async () => {
-    if (request) {
-      await promptAsync();
-    }
-  };
-
-  return { signIn, userInfo, loading, isReady: !!request };
+  return { signIn, userInfo, loading, isReady: !isExpoGo };
 }

@@ -53,4 +53,8 @@ export const clearAllListeners = () => {
   activeListeners.clear();
 };
 
+export const resetSession = () => {
+  sessionState.isEnding = false;
+};
+
 export { app, auth, db, storage };

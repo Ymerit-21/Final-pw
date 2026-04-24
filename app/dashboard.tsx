@@ -12,10 +12,9 @@ import {
 } from 'firebase/firestore';
 import { Stack, useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
-import * as Location from 'expo-location';
 import { updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { generateH3 } from '../hooks/useGeospatial';
-import { auth, db, registerListener, clearAllListeners, sessionState } from '../config/firebase';
+import { auth, db, registerListener, clearAllListeners, sessionState, resetSession } from '../config/firebase';
 import { useTheme } from '../context/ThemeContext';
 
 interface Transaction {
@@ -229,15 +228,11 @@ export default function DashboardScreen() {
     }
 
     return () => {
-      clearAllListeners();
+      // Individual listeners are already handled by registerListener's return function
     };
   }, [auth.currentUser]);
 
-  const toggleOnline = () => {
-    setIsOnline(!isOnline);
-  };
-
-  const handleLogout = () => {
+  const masterLogout = () => {
     Alert.alert("Logout", "Are you sure you want to sign out?", [
       { text: "Cancel", style: "cancel" },
       { 
@@ -245,12 +240,10 @@ export default function DashboardScreen() {
         style: "destructive",
         onPress: async () => {
           try {
-            // Master Switch: Synchronously kill all connections
             clearAllListeners();
-            // Then Sign Out
             await signOut(auth);
           } catch (error) {
-            sessionState.isEnding = false; // Reset if failed
+            resetSession();
             Alert.alert("Error", "Failed to sign out.");
           }
         } 
@@ -298,7 +291,7 @@ export default function DashboardScreen() {
                     }} />
                   )}
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.notificationIcon, { backgroundColor: theme.card }]} onPress={handleLogout}>
+                <TouchableOpacity style={[styles.notificationIcon, { backgroundColor: theme.card }]} onPress={masterLogout}>
                   <Feather name="log-out" size={20} color="#FF3B30" />
                 </TouchableOpacity>
               </View>
@@ -382,18 +375,26 @@ export default function DashboardScreen() {
             <View>
               <Text style={[styles.greetingTitle, { color: theme.text }]}>Welcome back, {userData.name}</Text>
             </View>
-            <TouchableOpacity 
-              style={[styles.notificationIcon, { backgroundColor: theme.card }]}
-              onPress={() => router.push('/notifications')}
-            >
-              <Feather name="bell" size={24} color={theme.text} />
-              {unreadCount > 0 && (
-                <View style={{
-                  position: 'absolute', top: 8, right: 8, width: 10, height: 10, 
-                  borderRadius: 5, backgroundColor: '#FF3B30', borderWidth: 1.5, borderColor: theme.card
-                }} />
-              )}
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity 
+                style={[styles.notificationIcon, { backgroundColor: theme.card }]}
+                onPress={() => router.push('/notifications')}
+              >
+                <Feather name="bell" size={24} color={theme.text} />
+                {unreadCount > 0 && (
+                  <View style={{
+                    position: 'absolute', top: 8, right: 8, width: 10, height: 10, 
+                    borderRadius: 5, backgroundColor: '#FF3B30', borderWidth: 1.5, borderColor: theme.card
+                  }} />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.notificationIcon, { backgroundColor: theme.card }]}
+                onPress={masterLogout}
+              >
+                <Feather name="log-out" size={20} color="#FF3B30" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Apple Wallet Style Hero */}

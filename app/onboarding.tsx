@@ -253,9 +253,8 @@ const styles = StyleSheet.create({
     marginLeft: -5,
   },
   stepIndicator: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
-    fontWeight: '600',
   },
   progressBarBackground: {
     height: 4,
@@ -280,18 +279,18 @@ const styles = StyleSheet.create({
     lineHeight: 40,
   },
   subtitle: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Poppins_400Regular',
     fontSize: 15,
     marginBottom: 40,
     lineHeight: 22,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 18,
     fontSize: 16,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Poppins_400Regular',
   },
   cardButton: {
     borderWidth: 1,
@@ -314,7 +313,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   cardSubtitle: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Poppins_400Regular',
     fontSize: 14,
     lineHeight: 20,
   },
@@ -325,7 +324,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   primaryButton: {
-    borderRadius: 50,
+    borderRadius: 16,
     paddingVertical: 18,
     alignItems: 'center',
     width: '100%',

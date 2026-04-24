@@ -121,9 +121,6 @@ export default function MessagesScreen() {
       
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
-        </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.text }]}>Messages</Text>
         <TouchableOpacity style={styles.searchBtn}>
           <Feather name="search" size={22} color={theme.text} />

@@ -4,7 +4,6 @@ import {
   ActivityIndicator, Image, Dimensions, Platform, Alert, TextInput
 } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE, Polyline, MapViewDirections } from '../components/MapComponents';
-import * as Location from 'expo-location';
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { auth, db, registerListener, sessionState } from '../config/firebase';
@@ -90,47 +89,71 @@ export default function MapExplorerScreen() {
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission denied', 'Allow location access to find experts near you.');
+      try {
+        // Use Web Geolocation API
+        if (!navigator.geolocation) {
+          Alert.alert('Geolocation', 'Geolocation is not supported by your browser.');
+          setLoading(false);
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const currentLocation = {
+              coords: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                altitude: position.coords.altitude,
+                altitudeAccuracy: position.coords.altitudeAccuracy,
+                heading: position.coords.heading,
+                speed: position.coords.speed,
+              },
+              timestamp: position.timestamp,
+            };
+            setLocation(currentLocation as any);
+            const userH3 = generateH3(currentLocation.coords.latitude, currentLocation.coords.longitude);
+            const nearbyH3Cells = getNeighboringH3(userH3);
+
+            setLoading(false);
+
+            // Query Experts who are ONLINE and in NEARBY H3 CELLS
+            // For production, we'd query by the currentH3 field.
+            // For this demo, we'll listen to all online experts and filter locally for H3 proximity.
+            const q = query(
+              collection(db, 'users'), 
+              where('isExpert', '==', true)
+            );
+
+            const unsub = registerListener(onSnapshot(q, (snap) => {
+              const list = snap.docs.map(doc => {
+                const data = doc.data();
+                return {
+                  id: doc.id,
+                  name: data.name,
+                  trade: data.trade,
+                  rating: data.rating || 4.5,
+                  coords: data.currentCoords || data.coords || generateMockAccraCoords(),
+                  currentH3: data.currentH3
+                };
+              });
+              setExperts(list);
+            }, (err) => {
+              if (err.code === 'permission-denied' || sessionState.isEnding) return;
+              console.error("Map Snapshot Error:", err);
+            }));
+
+            return () => unsub();
+          },
+          (error) => {
+            Alert.alert('Location Error', 'Unable to get your location. ' + error.message);
+            setLoading(false);
+          }
+        );
+      } catch (error) {
+        console.error('Geolocation error:', error);
         setLoading(false);
-        return;
       }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-      const userH3 = generateH3(currentLocation.coords.latitude, currentLocation.coords.longitude);
-      const nearbyH3Cells = getNeighboringH3(userH3);
-
-      setLoading(false);
-
-      // Query Experts who are ONLINE and in NEARBY H3 CELLS
-      // For production, we'd query by the currentH3 field.
-      // For this demo, we'll listen to all online experts and filter locally for H3 proximity.
-      const q = query(
-        collection(db, 'users'), 
-        where('isExpert', '==', true)
-      );
-
-      const unsub = registerListener(onSnapshot(q, (snap) => {
-        const list = snap.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            name: data.name,
-            trade: data.trade,
-            rating: data.rating || 4.5,
-            coords: data.currentCoords || data.coords || generateMockAccraCoords(),
-            currentH3: data.currentH3
-          };
-        });
-        setExperts(list);
-      }, (err) => {
-        if (err.code === 'permission-denied' || sessionState.isEnding) return;
-        console.error("Map Snapshot Error:", err);
-      }));
-
-      return () => unsub();
     })();
   }, [auth.currentUser]);
 

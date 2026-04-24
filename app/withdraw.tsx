@@ -149,7 +149,7 @@ export default function WithdrawScreen() {
           source: 'balance',
           amount: amountInPesewas,
           recipient: recipientCode,
-          reason: 'Wallet Withdrawal',
+          reason: 'Wallet Transaction',
           currency: 'GHS',
         }),
       });
@@ -161,7 +161,7 @@ export default function WithdrawScreen() {
         // Record debit transaction in Firestore
         await addDoc(collection(db, 'users', auth.currentUser!.uid, 'transactions'), {
           type: 'debit',
-          description: `MoMo Withdrawal (${networkName})`,
+          description: `MoMo Send (${networkName})`,
           amount: parseFloat(amount),
           reference: transferData.data?.reference || '',
           status: 'pending',
@@ -172,7 +172,7 @@ export default function WithdrawScreen() {
           balance: increment(-parseFloat(amount)),
         });
         Alert.alert(
-          '✅ Withdrawal Initiated!',
+          '✅ Send Initiated!',
           `GH₵ ${parseFloat(amount).toFixed(2)} is being sent to ${phone}.\n\nRef: ${transferData.data?.reference || '—'}`,
           [{ text: 'OK', onPress: () => router.back() }]
         );
@@ -202,7 +202,7 @@ export default function WithdrawScreen() {
               <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
                 <Ionicons name="arrow-back" size={24} color={theme.text} />
               </TouchableOpacity>
-              <Text style={[styles.headerTitle, { color: theme.text }]}>Withdraw</Text>
+              <Text style={[styles.headerTitle, { color: theme.text }]}>Send</Text>
               <View style={{ width: 34 }} />
             </View>
 
@@ -273,7 +273,7 @@ export default function WithdrawScreen() {
             </View>
 
             {/* Step 3: Amount */}
-            <Text style={[styles.sectionLabel, { color: theme.text }]}>3. Amount to Withdraw</Text>
+            <Text style={[styles.sectionLabel, { color: theme.text }]}>3. Amount to Send</Text>
             <View style={[styles.amountInputWrapper, { backgroundColor: theme.card, borderColor: theme.border }]}>
               <Text style={[styles.currencyPrefix, { color: theme.text }]}>GH₵</Text>
               <TextInput
@@ -312,7 +312,7 @@ export default function WithdrawScreen() {
 
             {/* Summary — always visible */}
             <View style={[styles.summaryCard, { backgroundColor: theme.card, borderColor: theme.divider }]}>
-              <Text style={[styles.summaryTitle, { color: theme.text }]}>Withdrawal Summary</Text>
+              <Text style={[styles.summaryTitle, { color: theme.text }]}>Transaction Summary</Text>
               <View style={[styles.summaryRow, { borderBottomColor: theme.divider }]}>
                 <Text style={[styles.summaryKey, { color: theme.subtext }]}>Network</Text>
                 <Text style={[styles.summaryVal, { color: theme.text }]}>{networkName || '—'}</Text>
@@ -342,7 +342,7 @@ export default function WithdrawScreen() {
             <View style={{ height: 30 }} />
           </ScrollView>
 
-          {/* Withdraw Button pinned at bottom */}
+          {/* Send Button pinned at bottom */}
           <View style={[styles.footer, { backgroundColor: theme.bg, borderTopColor: theme.divider }]}>
             <TouchableOpacity
               style={[styles.withdrawBtn, { backgroundColor: isDark ? '#D9F15D' : '#0F0F0F' }, loading && { opacity: 0.7 }]}
@@ -353,7 +353,7 @@ export default function WithdrawScreen() {
               {loading ? (
                 <ActivityIndicator color={isDark ? '#000' : '#FFF'} />
               ) : (
-                <Text style={[styles.withdrawBtnText, { color: isDark ? '#000' : '#FFF' }]}>Withdraw Now</Text>
+                <Text style={[styles.withdrawBtnText, { color: isDark ? '#000' : '#FFF' }]}>Send Now</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -398,12 +398,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     fontSize: 13,
     marginBottom: 8,
+    color: '#FFF',
   },
   balanceAmount: {
     fontFamily: 'Inter_700Bold',
     fontSize: 36,
     letterSpacing: -1,
     marginBottom: 12,
+    color: '#FFF',
   },
   balanceBadge: {
     flexDirection: 'row',

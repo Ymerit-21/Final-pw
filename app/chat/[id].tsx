@@ -27,7 +27,6 @@ import {
   View,
   Alert
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db, storage, registerListener, sessionState } from '../../config/firebase';
 
@@ -60,48 +59,59 @@ export default function ChatScreen() {
   };
 
   const handlePickImage = async () => {
-    // Request permission first on Android
-    if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Needed', 'Please allow photo library access to send images.');
-        return;
-      }
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.6,
-    });
-    if (!result.canceled && result.assets?.[0]?.uri) {
-      await sendImageMessage(result.assets[0].uri);
-    }
+    // Create file input for image selection from library
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    
+    input.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Read file and get data URL
+      const reader = new FileReader();
+      reader.onload = async (event: any) => {
+        const dataUrl = event.target.result;
+        // Convert data URL to blob for upload
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        await sendImageMessage(blob);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    input.click();
   };
 
   const handleTakePhoto = async () => {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (permission.status !== 'granted') {
-      Alert.alert('Permission needed', 'Camera access is required to take photos.');
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 0.5,
-    });
-    if (!result.canceled && result.assets?.[0]?.uri) {
-      await sendImageMessage(result.assets[0].uri);
-    }
+    // Create file input with camera capture (works on mobile phones)
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = true; // Request camera capture on mobile
+    
+    input.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event: any) => {
+        const dataUrl = event.target.result;
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        await sendImageMessage(blob);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    input.click();
   };
 
-  const sendImageMessage = async (uri: string) => {
+  const sendImageMessage = async (blob: Blob) => {
     if (!id || !currentUser) return;
     setUploading(true);
     try {
-      // 1. Convert local URI to a blob
-      const response = await fetch(uri);
-      const blob = await response.blob();
-
-      // 2. Upload blob to Firebase Storage
+      // Upload blob to Firebase Storage
       const filename = `chat_images/${id}/${currentUser.uid}_${Date.now()}.jpg`;
       const storageRef = ref(storage, filename);
       const uploadTask = uploadBytesResumable(storageRef, blob);

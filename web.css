@@ -1,0 +1,258 @@
+/* 
+ * Architect Web — Design Consistency System
+ * Matches mobile design language exactly.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600;700&family=Kode+Mono:wght@400;700&display=swap');
+
+/* --- Icon Font Fixes (Removed manual CDN overrides to use native bundled fonts) --- */
+:root {
+  /* Light Palette */
+  --bg: #F2F2F7;
+  --card: #FFFFFF;
+  --card-alt: #F2F2F7;
+  --text: #000000;
+  --subtext: #8E8E93;
+  --label: #3A3A3C;
+  --border: #E5E5EA;
+  --divider: #F2F2F7;
+  --input-bg: #F2F2F7;
+  --accent: #D9F15D;
+  --accent-fg: #000000;
+  --danger: #FF3B30;
+  --success: #32D74B;
+  --info: #007AFF;
+  --warning: #FF9500;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --radius-lg: 20px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Palette */
+    --bg: #000000;
+    --card: #1C1C1E;
+    --card-alt: #2C2C2E;
+    --text: #FFFFFF;
+    --subtext: #8E8E93;
+    --label: #EBEBF5;
+    --border: #38383A;
+    --divider: #2C2C2E;
+    --input-bg: #2C2C2E;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .font-rounded {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.font-mono {
+  font-family: 'Kode Mono', monospace;
+}
+
+/* --- Premium Components --- */
+
+/* Apple Wallet Style Hero Card */
+.apple-card {
+  background-color: #1C1C1E; /* Always dark for that "Elite" feel */
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+}
+
+.apple-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(217, 241, 93, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.apple-card .card-brand {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.apple-card .balance-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+}
+
+.apple-card .balance-amount {
+  font-family: 'Inter', sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+/* iOS Inset Style Card */
+.ios-inset-card {
+  background-color: var(--card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* --- Buttons --- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 15px;
+}
+
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--accent-fg);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 4px 15px rgba(217, 241, 93, 0.3);
+}
+
+.btn-secondary {
+  background-color: var(--card-alt);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--border);
+}
+
+/* --- Inputs --- */
+
+.input-field {
+  width: 100%;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.input-field::placeholder {
+  color: var(--subtext);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(217, 241, 93, 0.1);
+}
+
+/* --- Progress Bars --- */
+
+.progress-bg {
+  background-color: var(--card-alt);
+  height: 8px;
+  border-radius: 4px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background-color: var(--accent);
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+/* --- Badges --- */
+
+.badge-verified {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  color: #000;
+  font-size: 10px;
+}
+
+/* --- Scrollbar Customization --- */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--subtext);
+}
+
+/* --- React Native Web Fixes --- */
+
+[data-testid="root-view"] {
+  background-color: var(--bg);
+}
+
+/* Ensure text elements use correct font */
+div[dir="auto"], span[dir="auto"] {
+  font-family: 'Poppins', sans-serif;
+}

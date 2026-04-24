@@ -7,7 +7,7 @@ import {
 import { Stack, useRouter } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { auth, db, registerListener, clearAllListeners, sessionState } from '../config/firebase';
+import { auth, db, registerListener, clearAllListeners, sessionState, resetSession } from '../config/firebase';
 import { doc, onSnapshot, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useTheme } from '../context/ThemeContext';
@@ -69,8 +69,13 @@ export default function ProfileScreen() {
       {
         text: 'Log Out', style: 'destructive',
         onPress: async () => {
-          try { clearAllListeners(); await signOut(auth); }
-          catch { Alert.alert('Error', 'Failed to sign out.'); }
+          try {
+            clearAllListeners();
+            await signOut(auth);
+          } catch {
+            resetSession();
+            Alert.alert('Error', 'Failed to sign out.'); 
+          }
         }
       }
     ]);
@@ -146,9 +151,7 @@ export default function ProfileScreen() {
   // ─── Sub-components ─────────────────────────────────────────────
   const Header = () => (
     <View style={styles.header}>
-      <View style={{ width: 40 }} />
-      <Text style={styles.headerTitle}>Account</Text>
-      <View style={{ width: 40 }} />
+      <Text style={[styles.headerTitle, { color: theme.text }]}>Profile</Text>
     </View>
   );
 
@@ -207,12 +210,16 @@ export default function ProfileScreen() {
         <StatusBar style={isDark ? 'light' : 'dark'} />
         <SafeAreaView style={[styles.safe, { backgroundColor: theme.bg }]}>
           <View style={[styles.header, { backgroundColor: theme.bg }]}>
-            <View style={{ width: 40 }} />
-            <Text style={[styles.headerTitle, { color: theme.text }]}>Account</Text>
-            <View style={{ width: 40 }} />
+            <Text style={[styles.headerTitle, { color: theme.text }]}>Profile</Text>
           </View>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
             <ActivityIndicator size="large" color={theme.text} />
+            <TouchableOpacity 
+              style={{ marginTop: 40, padding: 10 }}
+              onPress={handleLogout}
+            >
+              <Text style={{ color: theme.subtext, fontFamily: 'Inter_400Regular' }}>Sign Out</Text>
+            </TouchableOpacity>
           </View>
         </SafeAreaView>
       </>
@@ -408,11 +415,15 @@ export default function ProfileScreen() {
           )}
 
           {/* ── Log Out ── */}
-          <View style={[styles.insetGroup, { marginTop: 30, marginBottom: 50, backgroundColor: theme.card }]}>
-            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-              <Ionicons name="log-out-outline" size={20} color="#FF3B30" />
-              <Text style={styles.logoutText}>Log Out</Text>
+          <View style={{ paddingHorizontal: 16, marginTop: 10, marginBottom: 60 }}>
+            <TouchableOpacity 
+              style={[styles.premiumLogoutBtn, { backgroundColor: isDark ? 'rgba(255,59,48,0.1)' : '#FFF' }]} 
+              onPress={handleLogout}
+            >
+              <Ionicons name="log-out" size={22} color="#FF3B30" />
+              <Text style={styles.premiumLogoutText}>Sign Out from Architect</Text>
             </TouchableOpacity>
+            <Text style={[styles.versionText, { color: theme.subtext }]}>Version 1.0.4 (Build 2024)</Text>
           </View>
 
         </ScrollView>
@@ -481,7 +492,27 @@ function SettingRow({ icon, color, label, subtitle, isLast, children, onPress, t
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   scrollContent: { paddingBottom: 120, paddingTop: 10 },
-  headerTitle: { fontFamily: 'Inter_700Bold', fontSize: 17 },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 25, 
+    paddingVertical: 15,
+    marginBottom: 10
+  },
+  headerTitle: { fontFamily: 'Inter_700Bold', fontSize: 28, letterSpacing: -0.5 },
+  notificationIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2
+  },
 
   // Hero
   heroSection: { alignItems: 'center', paddingVertical: 20, paddingHorizontal: 20 },
@@ -524,8 +555,8 @@ const styles = StyleSheet.create({
 
   // Groups
   sectionLabel: {
-    fontFamily: 'Inter_400Regular', fontSize: 12, color: '#8E8E93',
-    marginLeft: 32, marginTop: 22, marginBottom: 8, letterSpacing: 0.3,
+    fontFamily: 'Inter_700Bold', fontSize: 13, color: '#8E8E93',
+    marginLeft: 16, marginTop: 22, marginBottom: 8, letterSpacing: 0.5,
   },
   insetGroup: {
     backgroundColor: '#FFF', marginHorizontal: 16, borderRadius: 14, overflow: 'hidden',
@@ -542,8 +573,28 @@ const styles = StyleSheet.create({
   rowLabel: { fontFamily: 'Inter_400Regular', fontSize: 16 },
   rowSub: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 1 },
 
-  logoutBtn: { paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 },
-  logoutText: { fontFamily: 'Inter_400Regular', fontSize: 17, color: '#FF3B30' },
+  premiumLogoutBtn: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    paddingVertical: 18, 
+    borderRadius: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,59,48,0.2)'
+  },
+  premiumLogoutText: { 
+    fontFamily: 'Inter_700Bold', 
+    fontSize: 16, 
+    color: '#FF3B30' 
+  },
+  versionText: {
+    textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    marginTop: 20,
+    opacity: 0.6
+  },
 
   // Tab bar
   tabBar: {

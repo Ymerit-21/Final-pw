@@ -9,7 +9,6 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 import { auth, db, storage } from '../config/firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
 
 const TRADES = [
@@ -49,25 +48,27 @@ export default function ExpertRegistrationScreen() {
   const [basePrice, setBasePrice] = useState('');
 
   const pickImage = async (type: 'cardFront' | 'cardBack' | 'selfie') => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'We need camera permissions to verify your identity.');
-      return;
-    }
+    // Create a file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    
+    input.onchange = (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: type === 'selfie' ? [1, 1] : [16, 9],
-      quality: 0.1, // High compression to fit inside Firestore 1MB document limit
-      base64: true, // We will save the raw image text directly to the database
-    });
+      // Read file as base64
+      const reader = new FileReader();
+      reader.onload = (event: any) => {
+        const b64Data = event.target.result; // Already in data:image/... format
+        if (type === 'cardFront') setGhanaCardImage(b64Data);
+        else if (type === 'cardBack') setGhanaCardBack(b64Data);
+        else setSelfieImage(b64Data);
+      };
+      reader.readAsDataURL(file);
+    };
 
-    if (!result.canceled && result.assets[0].base64) {
-      const b64Data = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      if (type === 'cardFront') setGhanaCardImage(b64Data);
-      else if (type === 'cardBack') setGhanaCardBack(b64Data);
-      else setSelfieImage(b64Data);
-    }
+    input.click();
   };
 
   const addSkill = () => {

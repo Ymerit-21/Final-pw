@@ -1,6 +1,8 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
+import '../web.css';
+
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { useEffect, useState, useRef } from 'react';
 import { auth, db } from '../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -28,8 +30,6 @@ import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
 
-
-
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     KodeMono_400Regular,
@@ -53,6 +53,7 @@ export default function RootLayout() {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
+
   }, [fontsLoaded]);
 
   // Handle Authentication State
@@ -68,7 +69,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (!isReady || !fontsLoaded) return;
 
-    const isRoot = segments.length === 0;
+    const isRoot = (segments as string[]).length === 0;
     const inAuthGroup = segments[0] === 'sign-in' || 
                        segments[0] === 'create-account' || 
                        segments[0] === 'forgot-password';

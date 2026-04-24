@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as Haptics from 'expo-haptics';
 import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -36,10 +35,7 @@ export default function InAppNotification({ notification, onClose }: Props) {
       tension: 40,
     }).start();
 
-    // 2. Play Haptic Feedback
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    // 3. Auto-dismiss after 4 seconds
+    // 2. Auto-dismiss after 4 seconds
     const timer = setTimeout(() => {
       dismiss();
     }, 4500);

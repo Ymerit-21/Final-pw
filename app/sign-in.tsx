@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
@@ -131,7 +132,7 @@ export default function SignInScreen() {
                 style={[
                   styles.input,
                   { backgroundColor: theme.cardAlt, borderColor: theme.border, color: theme.inputText },
-                  { fontFamily: email.length > 0 ? 'Helvetica' : 'Inter_400Regular' },
+                  { fontFamily: 'Poppins_400Regular' },
                   emailError ? styles.inputError : null
                 ]}
                 placeholder="Enter your Email"
@@ -159,7 +160,7 @@ export default function SignInScreen() {
                   style={[
                     styles.passwordInput,
                     { color: theme.inputText },
-                    { fontFamily: password.length > 0 ? 'Helvetica' : 'Inter_400Regular' }
+                    { fontFamily: 'Poppins_400Regular' }
                   ]}
                   placeholder="Enter your Password"
                   placeholderTextColor={theme.placeholder}
@@ -216,10 +217,15 @@ export default function SignInScreen() {
               onPress={googleSignIn}
               disabled={googleLoading}
             >
+              <Image 
+                source={{ uri: 'https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png' }} 
+                style={{ width: 20, height: 20, marginRight: 10 }} 
+              />
               <Text style={[styles.socialButtonText, { color: theme.text }]}>Sign in with Google</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.cardAlt, borderWidth: 1, borderColor: theme.divider }]} activeOpacity={0.8}>
+              <Ionicons name="logo-apple" size={20} color={theme.text} style={{ marginRight: 10 }} />
               <Text style={[styles.socialButtonText, { color: theme.text }]}>Sign in with Apple</Text>
             </TouchableOpacity>
 
@@ -271,13 +277,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 14,
     fontSize: 15,
@@ -286,7 +292,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 12,
   },
   passwordInput: {
     flex: 1,
@@ -302,11 +308,11 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   forgotPasswordText: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter_400Regular',
     fontSize: 13,
   },
   primaryButton: {
-    borderRadius: 50,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 30,
@@ -325,15 +331,17 @@ const styles = StyleSheet.create({
     height: 1,
   },
   dividerText: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
     paddingHorizontal: 15,
   },
   socialButton: {
-    borderRadius: 50,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   socialButtonText: {
     fontFamily: 'Inter_400Regular',
@@ -344,12 +352,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footerText: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter_400Regular',
     fontSize: 14,
   },
    signUpText: {
-    fontFamily: 'Helvetica',
-    fontWeight: 'bold',
+    fontFamily: 'Inter_700Bold',
     textDecorationLine: 'underline',
   },
   inputError: {
@@ -357,7 +364,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#FF3B30',
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter_400Regular',
     fontSize: 12,
     marginTop: 5,
     marginLeft: 2,
