@@ -12,7 +12,7 @@ import { auth, db } from '../config/firebase';
 import { 
   doc, updateDoc, increment, collection, 
   addDoc, serverTimestamp, getDoc,
-  onSnapshot
+  onSnapshot, getDocs, query, where
 } from 'firebase/firestore';
 import { useTheme } from '../context/ThemeContext';
 
@@ -95,23 +95,44 @@ export default function AddExpenseScreen() {
     try {
       const uid = auth.currentUser?.uid;
       if (!uid) return;
+      const today = new Date().toISOString().split('T')[0];
 
+      // 1. Write the transaction (feeds Line Chart + transaction list)
       await addDoc(collection(db, 'users', uid, 'transactions'), {
         type: 'debit',
         description: description.trim() || `Spent on ${selectedCategory.name}`,
         amount: expenseAmount,
         category: selectedCategory.name,
+        date: today,
         createdAt: serverTimestamp(),
       });
 
+      // 2. Decrement user wallet balance
       await updateDoc(doc(db, 'users', uid), {
         balance: increment(-expenseAmount),
         budgetUsed: increment(expenseAmount),
       });
 
-      if (selectedCategory.limit) {
-        await updateDoc(doc(db, 'users', uid, 'budgets', selectedCategory.id), {
-          spent: increment(expenseAmount)
+      // 3. Find or auto-create a matching budget entry
+      //    This feeds the Bar Chart and Pie Chart in Financial Hub
+      const budgetsSnap = await getDocs(collection(db, 'users', uid, 'budgets'));
+      const existingBudget = budgetsSnap.docs.find(
+        d => d.data().name?.toLowerCase() === selectedCategory.name.toLowerCase()
+      );
+
+      if (existingBudget) {
+        // Budget exists — just increment spent
+        await updateDoc(doc(db, 'users', uid, 'budgets', existingBudget.id), {
+          spent: increment(expenseAmount),
+        });
+      } else {
+        // Auto-create a budget entry so charts populate immediately
+        await addDoc(collection(db, 'users', uid, 'budgets'), {
+          name: selectedCategory.name,
+          limit: 300,          // sensible student default
+          spent: expenseAmount,
+          color: selectedCategory.color || '#D9F15D',
+          createdAt: serverTimestamp(),
         });
       }
 
