@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   ActivityIndicator,
   Image,
+  Platform
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../context/ThemeContext';
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
   logoIconPlaceholder: { width: 80, height: 80, borderRadius: 20, justifyContent: 'center', alignItems: 'center', shadowColor: '#D9F15D', shadowOpacity: 0.3, shadowRadius: 20, shadowOffset: { width: 0, height: 0 } },
   logoInitial: { fontSize: 40, fontWeight: '900' },
   brandingText: { alignItems: 'center' },
-  title: { fontSize: 48, fontFamily: 'KodeMono_700Bold', letterSpacing: -1 },
+  title: { fontSize: 48, fontFamily: Platform.OS === 'web' ? 'Kode Mono' : 'KodeMono_700Bold', letterSpacing: -1 },
   subtitle: { fontSize: 14, fontFamily: 'Poppins_600SemiBold', letterSpacing: 2, opacity: 0.7, marginTop: 4 },
   footer: { gap: 15 },
   button: { paddingVertical: 18, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },

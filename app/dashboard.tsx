@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   cardGlassTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  cardBrand: { fontFamily: 'KodeMono_700Bold', fontSize: 10, color: 'rgba(255,255,255,0.5)', letterSpacing: 2 },
+  cardBrand: { fontFamily: Platform.OS === 'web' ? 'Kode Mono' : 'KodeMono_700Bold', fontSize: 10, color: 'rgba(255,255,255,0.5)', letterSpacing: 2 },
   cardMainContent: { marginTop: 20 },
   appleBalanceLabel: { fontFamily: 'Inter_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 4 },
   appleBalanceAmount: { fontFamily: 'Inter_700Bold', fontSize: 34, color: '#FFF', letterSpacing: -1 },
