@@ -259,7 +259,7 @@ export default function ExpertRegistrationScreen() {
               <Text style={[styles.subtitle, { color: theme.subtext }]}>Set the average amount you charge per job.</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.cardAlt, borderColor: theme.border, color: theme.inputText }]}
-                placeholder="e.g. 150"
+                placeholder="e.g. 50"
                 placeholderTextColor={theme.placeholder}
                 keyboardType="numeric"
                 value={basePrice}

@@ -167,7 +167,7 @@ export default function MarketplaceScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.offerTitle, { color: '#FFF' }]}>Offer Services</Text>
-                    <Text style={styles.offerSubtitle}>List your professional skills. Typical students earn <Text style={{fontFamily: 'Inter_700Bold', color: '#D9F15D'}}>₵150 - ₵500</Text> weekly.</Text>
+                    <Text style={styles.offerSubtitle}>List your professional skills. Typical students earn <Text style={{fontFamily: 'Inter_700Bold', color: '#D9F15D'}}>₵50 - ₵150</Text> per job.</Text>
                   </View>
                   <Feather name="plus-circle" size={24} color="#D9F15D" />
                 </View>

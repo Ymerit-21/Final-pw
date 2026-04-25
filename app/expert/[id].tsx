@@ -118,7 +118,7 @@ export default function ExpertDetailScreen() {
           expertId: profile.id,
           status: 'pending',
           trade: profile.trade,
-          price: profile.basePrice || 150, // Use expert's base price
+          price: profile.basePrice || 50, // Use expert's base price
           createdAt: serverTimestamp(),
           studentName: user.displayName || 'Student',
           expertName: profile.name,
@@ -157,14 +157,14 @@ export default function ExpertDetailScreen() {
     };
 
     if (Platform.OS === 'web') {
-      const confirm = window.confirm(`Send a job request to ${profile.name.split(' ')[0]} for ₵${profile.basePrice || 150}?`);
+      const confirm = window.confirm(`Send a job request to ${profile.name.split(' ')[0]} for ₵${profile.basePrice || 50}?`);
       if (confirm) {
         executeBooking();
       }
     } else {
       Alert.alert(
         "Confirm Request",
-        `Send a job request to ${profile.name.split(' ')[0]} for ₵${profile.basePrice || 150}?`,
+        `Send a job request to ${profile.name.split(' ')[0]} for ₵${profile.basePrice || 50}?`,
         [
           { text: "Cancel", style: "cancel" },
           { text: "Send Request", onPress: executeBooking }

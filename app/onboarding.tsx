@@ -148,7 +148,7 @@ export default function OnboardingScreen() {
                 <Text style={[styles.title, { color: theme.text }]}>What is your monthly budget goal?</Text>
                 <Text style={[styles.subtitle, { color: theme.subtext }]}>Helps us match you with the right opportunities.</Text>
                 
-                {['Under GH₵ 1k', 'GH₵ 1k - GH₵ 5k', 'GH₵ 5k - GH₵ 10k', 'GH₵ 10k+'].map((option) => (
+                {['Under GH₵ 50', 'GH₵ 50 - GH₵ 100', 'GH₵ 100 - GH₵ 300', 'GH₵ 300+'].map((option) => (
                   <TouchableOpacity 
                     key={option}
                     style={[

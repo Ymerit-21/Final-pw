@@ -211,7 +211,7 @@ export default function EditExpertProfileScreen() {
           <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDark ? 1 : 0 }]}>
             <TextInput
               style={[styles.input, { backgroundColor: theme.cardAlt, color: theme.inputText }]}
-              placeholder="e.g. 150"
+              placeholder="e.g. 50"
               placeholderTextColor={theme.placeholder}
               keyboardType="numeric"
               value={basePrice}
