@@ -125,7 +125,7 @@ export default function EditExpertProfileScreen() {
 
           {/* Trade Selection */}
           <Text style={[styles.sectionLabel, { color: theme.subtext }]}>YOUR TRADE</Text>
-          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDark ? 1 : 0 }]}>
+          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
             <View style={styles.tradesGrid}>
               {TRADES.map(trade => (
                 <TouchableOpacity
@@ -162,7 +162,7 @@ export default function EditExpertProfileScreen() {
 
           {/* Skills */}
           <Text style={[styles.sectionLabel, { color: theme.subtext }]}>YOUR SKILLS</Text>
-          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDark ? 1 : 0 }]}>
+          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
             <View style={styles.skillsRow}>
               <TextInput
                 style={[styles.input, { flex: 1, marginBottom: 0, backgroundColor: theme.cardAlt, color: theme.inputText }]}
@@ -193,7 +193,7 @@ export default function EditExpertProfileScreen() {
 
           {/* Bio */}
           <Text style={[styles.sectionLabel, { color: theme.subtext }]}>BIO / ABOUT YOU</Text>
-          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDark ? 1 : 0 }]}>
+          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
             <TextInput
               style={[styles.input, styles.bioInput, { backgroundColor: theme.cardAlt, color: theme.inputText }]}
               placeholder="Tell clients what you do and what makes you stand out..."
@@ -208,7 +208,7 @@ export default function EditExpertProfileScreen() {
 
           {/* Pricing */}
           <Text style={[styles.sectionLabel, { color: theme.subtext }]}>AVERAGE CHARGE (₵)</Text>
-          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: isDark ? 1 : 0 }]}>
+          <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
             <TextInput
               style={[styles.input, { backgroundColor: theme.cardAlt, color: theme.inputText }]}
               placeholder="e.g. 50"
@@ -253,8 +253,8 @@ const styles = StyleSheet.create({
 
   content: { padding: 20 },
   sectionLabel: {
-    fontFamily: 'Inter_400Regular', fontSize: 12, color: '#8E8E93',
-    letterSpacing: 0.5, marginBottom: 10, marginLeft: 4, textTransform: 'uppercase'
+    fontFamily: 'Inter_700Bold', fontSize: 13, color: '#8E8E93',
+    letterSpacing: 0.5, marginBottom: 10, marginLeft: 6, textTransform: 'uppercase'
   },
   card: {
     backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 24,

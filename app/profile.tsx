@@ -296,7 +296,7 @@ export default function ProfileScreen() {
 
           {/* ── Stats Row ── */}
           {!isAdmin && (
-            <View style={[styles.statsRow, { backgroundColor: theme.card }]}>
+            <View style={[styles.statsRow, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
               <View style={styles.statBox}>
                 <Text style={[styles.statValue, { color: theme.text }]}>{jobStats.completed}</Text>
                 <Text style={[styles.statLabel, { color: theme.subtext }]}>Jobs Done</Text>
@@ -316,7 +316,7 @@ export default function ProfileScreen() {
 
           {/* ── Account Settings ── */}
           <Text style={[styles.sectionLabel, { color: theme.subtext }]}>ACCOUNT SETTINGS</Text>
-          <View style={[styles.insetGroup, { backgroundColor: theme.card }]}>
+          <View style={[styles.insetGroup, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
             <SettingRow
               icon="person" color="#007AFF" label="Personal Information"
               subtitle={userData?.name}
@@ -360,7 +360,7 @@ export default function ProfileScreen() {
           {!isAdmin && (
             <>
               <Text style={[styles.sectionLabel, { color: theme.subtext }]}>STRATEGY & EARNINGS</Text>
-              <View style={[styles.insetGroup, { backgroundColor: theme.card }]}>
+              <View style={[styles.insetGroup, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
                 <SettingRow
                   icon="flag" color="#FF9500" label="Financial Goals"
                   subtitle="Set & track milestones"
@@ -396,7 +396,7 @@ export default function ProfileScreen() {
 
           {/* ── Support ── */}
           <Text style={[styles.sectionLabel, { color: theme.subtext }]}>SUPPORT</Text>
-          <View style={[styles.insetGroup, { backgroundColor: theme.card }]}>
+          <View style={[styles.insetGroup, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
             <SettingRow
               icon="help-circle" color="#8E8E93" label="Help Center"
               subtitle="FAQs & guides"
@@ -416,7 +416,7 @@ export default function ProfileScreen() {
           {isAdmin && (
             <>
               <Text style={[styles.sectionLabel, { color: theme.subtext }]}>ADMINISTRATION</Text>
-              <View style={[styles.insetGroup, { backgroundColor: theme.card }]}>
+              <View style={[styles.insetGroup, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
                 <SettingRow icon="shield-checkmark" color="#5856D6" label="Admin Shield"
                   onPress={() => router.push('/dashboard')} theme={theme} />
                 <SettingRow icon="people" color="#FF9500" label="Verify Experts"
@@ -583,8 +583,8 @@ const styles = StyleSheet.create({
     width: 30, height: 30, borderRadius: 7,
     justifyContent: 'center', alignItems: 'center', marginRight: 12,
   },
-  rowLabel: { fontFamily: 'Inter_400Regular', fontSize: 16 },
-  rowSub: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 1 },
+  rowLabel: { fontFamily: 'Inter_400Regular', fontSize: 16, marginBottom: 2 },
+  rowSub: { fontFamily: 'Inter_400Regular', fontSize: 13, opacity: 0.6 },
 
   premiumLogoutBtn: { 
     flexDirection: 'row', 
