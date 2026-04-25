@@ -30,7 +30,7 @@ export default function AddExpenseScreen() {
   const { isDark, theme } = useTheme();
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<any>(FALLBACK_CATEGORIES[0]);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [userBalance, setUserBalance] = useState(0);
   const [budgets, setBudgets] = useState<any[]>([]);
@@ -166,10 +166,10 @@ export default function AddExpenseScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={[styles.backBtn, { borderColor: theme.border, borderWidth: 1 }]}
+          style={styles.backBtn}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={20} color={theme.text} />
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.text }]}>Log Expense</Text>
       </View>
@@ -224,38 +224,42 @@ export default function AddExpenseScreen() {
             </View>
           </View>
 
-          {/* Description Section */}
-          <View style={styles.formSection}>
-            <Text style={[styles.inputLabel, { color: theme.subtext }]}>Description</Text>
-            <View style={[styles.inputBox, { backgroundColor: theme.cardAlt }]}>
-              <TextInput
-                style={[styles.descInput, { color: theme.text }]}
-                placeholder="What did you spend on?"
-                placeholderTextColor={theme.placeholder}
-                value={description}
-                onChangeText={setDescription}
-              />
-            </View>
-          </View>
+          {selectedCategory && (
+            <>
+              {/* Description Section */}
+              <View style={styles.formSection}>
+                <Text style={[styles.inputLabel, { color: theme.subtext }]}>Description</Text>
+                <View style={[styles.inputBox, { backgroundColor: theme.cardAlt }]}>
+                  <TextInput
+                    style={[styles.descInput, { color: theme.text }]}
+                    placeholder="What did you spend on?"
+                    placeholderTextColor={theme.placeholder}
+                    value={description}
+                    onChangeText={setDescription}
+                  />
+                </View>
+              </View>
 
-          {/* Date Section */}
-          <View style={styles.formSection}>
-            <Text style={[styles.inputLabel, { color: theme.subtext }]}>Date</Text>
-            <View style={[styles.selectBox, { backgroundColor: theme.cardAlt }]}>
-              <Text style={[styles.selectText, { color: theme.text }]}>
-                {new Date().toLocaleDateString('en-GB')}
-              </Text>
-              <Ionicons name="chevron-down" size={18} color={theme.subtext} />
-            </View>
-          </View>
+              {/* Date Section */}
+              <View style={styles.formSection}>
+                <Text style={[styles.inputLabel, { color: theme.subtext }]}>Date</Text>
+                <View style={[styles.selectBox, { backgroundColor: theme.cardAlt }]}>
+                  <Text style={[styles.selectText, { color: theme.text }]}>
+                    {new Date().toLocaleDateString('en-GB')}
+                  </Text>
+                  <Ionicons name="chevron-down" size={18} color={theme.subtext} />
+                </View>
+              </View>
 
-          {/* Balance preview */}
-          <View style={styles.balanceRow}>
-            <Ionicons name="information-circle-outline" size={15} color={theme.subtext} />
-            <Text style={[styles.balanceText, { color: theme.subtext }]}>
-              Balance after: GH₵{(userBalance - (parseFloat(amount) || 0)).toFixed(2)}
-            </Text>
-          </View>
+              {/* Balance preview */}
+              <View style={styles.balanceRow}>
+                <Ionicons name="information-circle-outline" size={15} color={theme.subtext} />
+                <Text style={[styles.balanceText, { color: theme.subtext }]}>
+                  Balance after: GH₵{(userBalance - (parseFloat(amount) || 0)).toFixed(2)}
+                </Text>
+              </View>
+            </>
+          )}
 
           <View style={{ height: 40 }} />
         </ScrollView>
@@ -307,8 +311,8 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase'
   },
   inputBox: { borderRadius: 14, padding: 16 },
-  mainInput: { fontFamily: 'Inter_400Regular', fontSize: 28 },
-  descInput: { fontFamily: 'Inter_400Regular', fontSize: 18 },
+  mainInput: { fontFamily: 'Inter_400Regular', fontSize: 24 },
+  descInput: { fontFamily: 'Inter_400Regular', fontSize: 16 },
 
   categoryGrid: { 
     flexDirection: 'row', 
@@ -333,7 +337,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 14,
   },
-  selectText: { fontFamily: 'Inter_400Regular', fontSize: 20 },
+  selectText: { fontFamily: 'Inter_400Regular', fontSize: 16 },
 
   balanceRow: {
     flexDirection: 'row',
