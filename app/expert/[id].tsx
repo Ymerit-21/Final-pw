@@ -316,54 +316,97 @@ export default function ExpertDetailScreen() {
           </View>
 
           <View style={[styles.detailsSection, { backgroundColor: theme.bg }]}>
-             <Text style={[styles.sectionTitle, { color: theme.text }]}>About Me</Text>
-             <Text style={[styles.bioText, { color: theme.subtext }]}>{profile.expertBio}</Text>
+             <Text style={[styles.sectionTitle, { color: theme.text, marginLeft: 5 }]}>About Me</Text>
+             <View style={[styles.insetGroup, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
+               <View style={styles.paddingBox}>
+                 <Text style={[styles.bioText, { color: theme.subtext }]}>{profile.expertBio}</Text>
+               </View>
+             </View>
              
-             <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-             <Text style={[styles.sectionTitle, { color: theme.text }]}>Service Location</Text>
-             <View style={styles.mapContainer}>
-               {profile.coords ? (
-                 <MapView
-                   provider={PROVIDER_GOOGLE}
-                   style={styles.miniMap}
-                   customMapStyle={silverMapStyle}
-                   initialRegion={{
-                     ...profile.coords,
-                     latitudeDelta: 0.01,
-                     longitudeDelta: 0.01,
-                   }}
-                   scrollEnabled={false}
-                   zoomEnabled={false}
-                   onPress={() => router.push('/map-explorer')}
-                 >
-                   <Marker coordinate={profile.coords}>
-                     <View style={[styles.markerBubble, { backgroundColor: isDark ? '#D9F15D' : '#000' }]}>
-                       <Ionicons name="location" size={16} color={isDark ? '#000' : '#FFF'} />
-                     </View>
-                   </Marker>
-                 </MapView>
-               ) : (
-                 <View style={[styles.miniMap, { backgroundColor: '#F5F5F5', justifyContent: 'center', alignItems: 'center' }]}>
-                   <ActivityIndicator color="#000" />
+             <Text style={[styles.sectionTitle, { color: theme.text, marginLeft: 5, marginTop: 25 }]}>Personal Details</Text>
+             <View style={[styles.insetGroup, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
+               {/* Trade Row */}
+               <TouchableOpacity style={[styles.row, { borderBottomColor: theme.border }]}>
+                 <View style={[styles.iconBox, { backgroundColor: isDark ? '#1C1C1E' : '#F2F2F7' }]}>
+                   <Feather name="briefcase" size={18} color={theme.text} />
                  </View>
-               )}
-               <TouchableOpacity 
-                 style={[styles.mapExpandBtn, { backgroundColor: isDark ? '#1C1C1E' : 'rgba(255,255,255,0.9)' }]}
-                 onPress={() => router.push('/map-explorer')}
-               >
-                 <Ionicons name="expand" size={18} color={theme.text} />
-                 <Text style={[styles.mapExpandText, { color: theme.text }]}>Open Explorer</Text>
+                 <View style={styles.rowInfo}>
+                   <Text style={[styles.rowLabel, { color: theme.text }]}>Trade</Text>
+                   <Text style={[styles.rowSub, { color: theme.subtext }]}>{profile.trade}</Text>
+                 </View>
+                 <Ionicons name="chevron-forward" size={18} color={theme.border} />
+               </TouchableOpacity>
+
+               {/* Pricing Row */}
+               <TouchableOpacity style={[styles.row, { borderBottomColor: theme.border }]}>
+                 <View style={[styles.iconBox, { backgroundColor: isDark ? '#1C1C1E' : '#F2F2F7' }]}>
+                   <Feather name="tag" size={18} color={theme.text} />
+                 </View>
+                 <View style={styles.rowInfo}>
+                   <Text style={[styles.rowLabel, { color: theme.text }]}>Base Rate</Text>
+                   <Text style={[styles.rowSub, { color: theme.subtext }]}>₵{profile.basePrice || 50} per hour / job</Text>
+                 </View>
+                 <Ionicons name="chevron-forward" size={18} color={theme.border} />
+               </TouchableOpacity>
+
+               {/* Experience Row */}
+               <TouchableOpacity style={styles.row}>
+                 <View style={[styles.iconBox, { backgroundColor: isDark ? '#1C1C1E' : '#F2F2F7' }]}>
+                   <Feather name="award" size={18} color={theme.text} />
+                 </View>
+                 <View style={styles.rowInfo}>
+                   <Text style={[styles.rowLabel, { color: theme.text }]}>Verification</Text>
+                   <Text style={[styles.rowSub, { color: profile.isVerified ? '#32D74B' : theme.subtext }]}>
+                     {profile.isVerified ? 'Fully Verified Pro' : 'Identity Verified'}
+                   </Text>
+                 </View>
+                 <Ionicons name="chevron-forward" size={18} color={theme.border} />
                </TouchableOpacity>
              </View>
 
-             <View style={[styles.divider, { backgroundColor: theme.border }]} />
+             <Text style={[styles.sectionTitle, { color: theme.text, marginLeft: 5, marginTop: 25 }]}>Service Location</Text>
+             <View style={[styles.insetGroup, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1, padding: 12 }]}>
+               <View style={styles.mapContainer}>
+                 {profile.coords ? (
+                   <MapView
+                     provider={PROVIDER_GOOGLE}
+                     style={styles.miniMap}
+                     customMapStyle={silverMapStyle}
+                     initialRegion={{
+                       ...profile.coords,
+                       latitudeDelta: 0.01,
+                       longitudeDelta: 0.01,
+                     }}
+                     scrollEnabled={false}
+                     zoomEnabled={false}
+                     onPress={() => router.push('/map-explorer')}
+                   >
+                     <Marker coordinate={profile.coords}>
+                       <View style={[styles.markerBubble, { backgroundColor: isDark ? '#D9F15D' : '#000' }]}>
+                         <Ionicons name="location" size={16} color={isDark ? '#000' : '#FFF'} />
+                       </View>
+                     </Marker>
+                   </MapView>
+                 ) : (
+                   <View style={[styles.miniMap, { backgroundColor: '#F5F5F5', justifyContent: 'center', alignItems: 'center' }]}>
+                     <ActivityIndicator color="#000" />
+                   </View>
+                 )}
+                 <TouchableOpacity 
+                   style={[styles.mapExpandBtn, { backgroundColor: isDark ? '#1C1C1E' : 'rgba(255,255,255,0.9)' }]}
+                   onPress={() => router.push('/map-explorer')}
+                 >
+                   <Ionicons name="expand" size={18} color={theme.text} />
+                   <Text style={[styles.mapExpandText, { color: theme.text }]}>Open Explorer</Text>
+                 </TouchableOpacity>
+               </View>
+             </View>
 
-             <Text style={[styles.sectionTitle, { color: theme.text }]}>Top Skills</Text>
+             <Text style={[styles.sectionTitle, { color: theme.text, marginLeft: 5, marginTop: 25 }]}>Top Skills</Text>
              <View style={styles.skillsWrapper}>
                 {profile.skills.length > 0 ? (
                   profile.skills.map((skill, index) => (
-                    <View key={index} style={[styles.skillTag, { backgroundColor: theme.cardAlt }]}>
+                    <View key={index} style={[styles.skillTag, { backgroundColor: theme.card, borderColor: theme.border, borderWidth: 1 }]}>
                       <Text style={[styles.skillText, { color: theme.text }]}>{skill}</Text>
                     </View>
                   ))
@@ -450,13 +493,37 @@ const styles = StyleSheet.create({
   statLabel: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 4 },
   statDivider: { width: 1, height: 30 },
 
-  detailsSection: { padding: 25 },
-  sectionTitle: { fontFamily: 'Inter_700Bold', fontSize: 18, marginBottom: 12 },
+  detailsSection: { padding: 20 },
+  sectionTitle: { fontFamily: 'Inter_700Bold', fontSize: 13, color: '#8E8E93', marginBottom: 8, letterSpacing: 0.5, textTransform: 'uppercase' },
+  insetGroup: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  paddingBox: { padding: 16 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  iconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  rowInfo: { flex: 1 },
+  rowLabel: { fontFamily: 'Inter_400Regular', fontSize: 14, opacity: 0.6, marginBottom: 2 },
+  rowSub: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
+
   bioText: { fontFamily: 'Inter_400Regular', fontSize: 15, lineHeight: 24 },
   divider: { height: 1, marginVertical: 25 },
   
   skillsWrapper: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  skillTag: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  skillTag: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 },
   skillText: { fontFamily: 'Inter_700Bold', fontSize: 13 },
   
   mapContainer: { 
