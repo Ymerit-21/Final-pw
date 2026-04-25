@@ -33,6 +33,7 @@ export default function MessagesScreen() {
   const router = useRouter();
   const { isDark, theme } = useTheme();
   const [chats, setChats] = useState<Chat[]>([]);
+  const [activeTab, setActiveTab] = useState<'all' | 'experts' | 'support'>('all');
   const [loading, setLoading] = useState(true);
 
   const currentUser = auth.currentUser;
@@ -69,6 +70,30 @@ export default function MessagesScreen() {
 
     return () => unsub();
   }, [currentUser]);
+
+  const filteredChats = chats.filter(chat => {
+    if (activeTab === 'all') return true;
+    
+    const otherUserId = chat.participants.find(p => p !== currentUser?.uid);
+    const otherUser = chat.participantInfo?.[otherUserId || ''];
+    
+    if (activeTab === 'experts') {
+      // Any user that isn't Support is considered an Expert/Peer in this context
+      return otherUser?.role !== 'Support' && otherUser?.role !== 'Admin';
+    }
+    
+    if (activeTab === 'support') {
+      return otherUser?.role === 'Support' || otherUser?.role === 'Admin';
+    }
+    
+    return true;
+  });
+
+  const handleSupportChat = async () => {
+    // Navigate to a dedicated support route or start a support chat
+    // For now, we'll push to help-center or a specific support chat ID
+    router.push('/help-center');
+  };
 
   const renderChatItem = ({ item }: { item: Chat }) => {
     const unreadCount = item.unreadCount?.[currentUser?.uid || ''] || 0;
@@ -129,36 +154,63 @@ export default function MessagesScreen() {
 
       {/* Tabs */}
       <View style={styles.tabsRow}>
-        <TouchableOpacity style={[styles.tab, { backgroundColor: isDark ? '#D9F15D' : '#000' }]}>
-          <Text style={[styles.filterTabText, { color: isDark ? '#000' : '#FFF', fontFamily: 'Inter_700Bold' }]}>All Chats</Text>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'all' ? { backgroundColor: isDark ? '#D9F15D' : '#000' } : { backgroundColor: theme.cardAlt }]}
+          onPress={() => setActiveTab('all')}
+        >
+          <Text style={[styles.filterTabText, activeTab === 'all' ? { color: isDark ? '#000' : '#FFF', fontFamily: 'Inter_700Bold' } : { color: theme.subtext }]}>All Chats</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.tab, { backgroundColor: theme.cardAlt }]}>
-          <Text style={[styles.filterTabText, { color: theme.subtext }]}>Experts</Text>
+        
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'experts' ? { backgroundColor: isDark ? '#D9F15D' : '#000' } : { backgroundColor: theme.cardAlt }]}
+          onPress={() => setActiveTab('experts')}
+        >
+          <Text style={[styles.filterTabText, activeTab === 'experts' ? { color: isDark ? '#000' : '#FFF', fontFamily: 'Inter_700Bold' } : { color: theme.subtext }]}>Experts</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.tab, { backgroundColor: theme.cardAlt }]}>
-          <Text style={[styles.filterTabText, { color: theme.subtext }]}>Support</Text>
+        
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'support' ? { backgroundColor: isDark ? '#D9F15D' : '#000' } : { backgroundColor: theme.cardAlt }]}
+          onPress={() => setActiveTab('support')}
+        >
+          <Text style={[styles.filterTabText, activeTab === 'support' ? { color: isDark ? '#000' : '#FFF', fontFamily: 'Inter_700Bold' } : { color: theme.subtext }]}>Support</Text>
         </TouchableOpacity>
       </View>
 
       <FlatList
-        data={chats}
+        data={filteredChats}
         renderItem={renderChatItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={[styles.emptyIconCircle, { backgroundColor: theme.card }]}>
-              <Ionicons name="chatbubbles-outline" size={40} color={theme.subtext} />
+          activeTab === 'support' ? (
+            <View style={styles.emptyContainer}>
+              <View style={[styles.emptyIconCircle, { backgroundColor: theme.card }]}>
+                <Ionicons name="headset-outline" size={40} color={theme.subtext} />
+              </View>
+              <Text style={[styles.emptyTitle, { color: theme.text }]}>Need Help?</Text>
+              <Text style={[styles.emptySubtitle, { color: theme.subtext }]}>Our team of experts is available 24/7 to help you with any issues.</Text>
+              <TouchableOpacity 
+                style={[styles.exploreBtn, { backgroundColor: isDark ? '#D9F15D' : '#000' }]} 
+                onPress={handleSupportChat}
+              >
+                <Text style={[styles.exploreBtnText, { color: isDark ? '#000' : '#FFF' }]}>Contact Support</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={[styles.emptyTitle, { color: theme.text }]}>No messages yet</Text>
-            <Text style={[styles.emptySubtitle, { color: theme.subtext }]}>Find an expert on the map to start chatting!</Text>
-            <TouchableOpacity 
-              style={[styles.exploreBtn, { backgroundColor: isDark ? '#D9F15D' : '#000' }]} 
-              onPress={() => router.push('/map-explorer')}
-            >
-              <Text style={[styles.exploreBtnText, { color: isDark ? '#000' : '#FFF' }]}>Explore Experts</Text>
-            </TouchableOpacity>
-          </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <View style={[styles.emptyIconCircle, { backgroundColor: theme.card }]}>
+                <Ionicons name="chatbubbles-outline" size={40} color={theme.subtext} />
+              </View>
+              <Text style={[styles.emptyTitle, { color: theme.text }]}>No messages yet</Text>
+              <Text style={[styles.emptySubtitle, { color: theme.subtext }]}>Find an expert on the map to start chatting!</Text>
+              <TouchableOpacity 
+                style={[styles.exploreBtn, { backgroundColor: isDark ? '#D9F15D' : '#000' }]} 
+                onPress={() => router.push('/map-explorer')}
+              >
+                <Text style={[styles.exploreBtnText, { color: isDark ? '#000' : '#FFF' }]}>Explore Experts</Text>
+              </TouchableOpacity>
+            </View>
+          )
         }
       />
 
