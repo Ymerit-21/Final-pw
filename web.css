@@ -252,8 +252,8 @@ h1, h2, h3, .font-rounded {
   background-color: var(--bg);
 }
 
-/* Ensure text elements use correct font */
-div[dir="auto"], span[dir="auto"] {
+/* Ensure text elements use correct font without overriding React Native styles */
+:where(div[dir="auto"], span[dir="auto"]) {
   font-family: 'Inter', sans-serif;
 }
 
