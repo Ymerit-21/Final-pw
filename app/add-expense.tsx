@@ -228,20 +228,11 @@ export default function AddExpenseScreen() {
             </View>
           </View>
 
-          {/* Budget Section */}
-          <View style={styles.formSection}>
-            <Text style={[styles.inputLabel, { color: theme.subtext }]}>Apply to budget</Text>
-            <View style={[styles.selectBox, { backgroundColor: theme.cardAlt }]}>
-              <Text style={[styles.selectText, { color: theme.text }]}>No budget</Text>
-              <Ionicons name="chevron-down" size={18} color={theme.subtext} />
-            </View>
-          </View>
-
           {/* Balance preview */}
           <View style={styles.balanceRow}>
             <Ionicons name="information-circle-outline" size={15} color={theme.subtext} />
             <Text style={[styles.balanceText, { color: theme.subtext }]}>
-              Balance after: ₵{(userBalance - (parseFloat(amount) || 0)).toFixed(2)}
+              Balance after: GH₵{(userBalance - (parseFloat(amount) || 0)).toFixed(2)}
             </Text>
           </View>
 
