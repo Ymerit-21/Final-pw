@@ -16,11 +16,12 @@ import {
 import { useTheme } from '../context/ThemeContext';
 
 const FALLBACK_CATEGORIES = [
-  { id: 'fees', name: 'Tuition Fees', icon: 'school-outline', color: '#D9F15D' },
-  { id: 'service', name: 'Service Capital', icon: 'briefcase-outline', color: '#D9F15D' },
-  { id: 'emergency', name: 'Emergency Fund', icon: 'shield-checkmark-outline', color: '#D9F15D' },
-  { id: 'personal', name: 'Personal Life', icon: 'heart-outline', color: '#D9F15D' },
-  { id: 'custom', name: 'Custom Goal', icon: 'flag-outline', color: '#D9F15D' },
+  { id: 'food', name: 'Food', emoji: '🍔', color: '#FF9500' },
+  { id: 'transport', name: 'Transport', emoji: '🚗', color: '#5856D6' },
+  { id: 'housing', name: 'Housing', emoji: '🏠', color: '#FF2D55' },
+  { id: 'education', name: 'Education', emoji: '📚', color: '#007AFF' },
+  { id: 'health', name: 'Health', emoji: '💊', color: '#32D74B' },
+  { id: 'other', name: 'Other', emoji: '📦', color: '#D9F15D' },
 ];
 
 export default function AddExpenseScreen() {
@@ -113,14 +114,14 @@ export default function AddExpenseScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
       <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar style="light" />
       
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: theme.border }]}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="close" size={28} color={theme.text} />
+      <View style={styles.header}>
+        <TouchableOpacity style={[styles.backBtn, { borderColor: theme.border, borderWidth: 1 }]} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={20} color={theme.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: theme.text }]}>Log Expense</Text>
-        <View style={{ width: 40 }} />
       </View>
 
       <KeyboardAvoidingView 
@@ -129,13 +130,13 @@ export default function AddExpenseScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           
-          <View style={styles.amountSection}>
-            <Text style={[styles.amountLabel, { color: theme.subtext }]}>How much did you spend?</Text>
-            <View style={styles.amountInptWrapper}>
-              <Text style={[styles.currency, { color: theme.text }]}>GH₵</Text>
+          {/* Amount Section */}
+          <View style={styles.formSection}>
+            <Text style={[styles.inputLabel, { color: theme.subtext }]}>Amount (₵)</Text>
+            <View style={[styles.inputBox, { backgroundColor: theme.cardAlt }]}>
               <TextInput
-                style={[styles.amountInput, { color: theme.text }]}
-                placeholder="0"
+                style={[styles.mainInput, { color: theme.text }]}
+                placeholder="0.00"
                 placeholderTextColor={theme.placeholder}
                 keyboardType="numeric"
                 value={amount}
@@ -145,57 +146,71 @@ export default function AddExpenseScreen() {
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Category</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll}>
-              {(budgets.length > 0 ? budgets : FALLBACK_CATEGORIES).map(cat => (
-                <TouchableOpacity 
-                  key={cat.id} 
-                  onPress={() => setSelectedCategory(cat)}
-                  style={[
-                    styles.catPill,
-                    { backgroundColor: theme.cardAlt, borderColor: theme.border },
-                    selectedCategory?.id === cat.id && { backgroundColor: cat.color || '#000', borderColor: cat.color || '#000' }
-                  ]}
-                >
-                  {cat.icon && (
-                      <Ionicons 
-                        name={cat.icon as any} 
-                        size={16} 
-                        color={selectedCategory?.id === cat.id ? "#FFF" : theme.text} 
-                      />
-                  )}
-                  <Text style={[
-                    styles.catText,
-                    { color: theme.text },
-                    selectedCategory?.id === cat.id && { color: "#FFF" }
-                  ]}>{cat.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+          {/* Category Section */}
+          <View style={styles.formSection}>
+            <Text style={[styles.inputLabel, { color: theme.subtext }]}>CATEGORY</Text>
+            <View style={styles.categoryGrid}>
+              {(budgets.length > 0 ? budgets : FALLBACK_CATEGORIES).map(cat => {
+                const isSelected = selectedCategory?.id === cat.id;
+                return (
+                  <TouchableOpacity 
+                    key={cat.id} 
+                    onPress={() => setSelectedCategory(cat)}
+                    style={[
+                      styles.categoryCard,
+                      { backgroundColor: theme.cardAlt, borderColor: 'transparent', borderWidth: 1 },
+                      isSelected && { borderColor: '#D9F15D', backgroundColor: 'rgba(217, 241, 93, 0.05)' }
+                    ]}
+                  >
+                    <Text style={styles.emoji}>{cat.emoji || '💰'}</Text>
+                    <Text style={[styles.categoryName, { color: theme.text }]}>{cat.name}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Note (Optional)</Text>
-            <TextInput
-              style={[styles.noteInput, { backgroundColor: theme.cardAlt, borderColor: theme.border, color: theme.inputText }]}
-              placeholder="What was this for? (e.g. Lunch at SRC)"
-              placeholderTextColor={theme.placeholder}
-              value={description}
-              onChangeText={setDescription}
-            />
+          {/* Description Section */}
+          <View style={styles.formSection}>
+            <Text style={[styles.inputLabel, { color: theme.subtext }]}>Description</Text>
+            <View style={[styles.inputBox, { backgroundColor: theme.cardAlt }]}>
+              <TextInput
+                style={[styles.mainInput, { color: theme.text, fontSize: 18 }]}
+                placeholder="What did you spend on?"
+                placeholderTextColor={theme.placeholder}
+                value={description}
+                onChangeText={setDescription}
+              />
+            </View>
           </View>
 
-          <View style={styles.balanceInfo}>
-            <Ionicons name="information-circle-outline" size={16} color={theme.subtext} />
-            <Text style={[styles.balanceInfoText, { color: theme.subtext }]}>
-              Balance after: GH₵ {(userBalance - (parseFloat(amount) || 0)).toFixed(2)}
-            </Text>
+          {/* Date Section */}
+          <View style={styles.formSection}>
+            <Text style={[styles.inputLabel, { color: theme.subtext }]}>Date</Text>
+            <TouchableOpacity style={[styles.selectBox, { backgroundColor: theme.cardAlt }]}>
+              <Text style={[styles.selectText, { color: theme.text }]}>
+                {new Date().toLocaleDateString('en-GB')}
+              </Text>
+              <Ionicons name="chevron-down" size={18} color={theme.text} />
+            </TouchableOpacity>
           </View>
+
+          {/* Budget Section */}
+          <View style={styles.formSection}>
+            <Text style={[styles.inputLabel, { color: theme.subtext }]}>Apply to budget</Text>
+            <TouchableOpacity style={[styles.selectBox, { backgroundColor: theme.cardAlt }]}>
+              <Text style={[styles.selectText, { color: theme.text }]}>
+                {budgets.length > 0 ? 'No budget' : 'No budget'}
+              </Text>
+              <Ionicons name="chevron-down" size={18} color={theme.text} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ height: 40 }} />
 
         </ScrollView>
 
-        <View style={[styles.footer, { borderTopColor: theme.border }]}>
+        <View style={styles.footer}>
           <TouchableOpacity 
             style={[styles.saveBtn, { backgroundColor: isDark ? '#D9F15D' : '#000' }, loading && { opacity: 0.7 }]}
             onPress={handleLogExpense}
@@ -204,7 +219,7 @@ export default function AddExpenseScreen() {
             {loading ? (
               <ActivityIndicator color={isDark ? '#000' : '#FFF'} />
             ) : (
-              <Text style={[styles.saveBtnText, { color: isDark ? '#000' : '#FFF' }]}>Log Expense Now</Text>
+              <Text style={[styles.saveBtnText, { color: isDark ? '#000' : '#FFF' }]}>Save Expense</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -218,58 +233,51 @@ const styles = StyleSheet.create({
   header: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    justifyContent: 'space-between', 
     paddingHorizontal: 20, 
     paddingVertical: 15,
-    borderBottomWidth: 1
+    gap: 15
   },
-  headerTitle: { fontFamily: 'Inter_700Bold', fontSize: 20 },
-  backBtn: { padding: 5 },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 30 },
-  amountSection: { alignItems: 'center', marginBottom: 40 },
-  amountLabel: { fontFamily: 'Inter_400Regular', fontSize: 14, marginBottom: 15 },
-  amountInptWrapper: { flexDirection: 'row', alignItems: 'center' },
-  currency: { fontFamily: 'Inter_700Bold', fontSize: 32, marginRight: 10 },
-  amountInput: { 
-    fontFamily: 'Inter_700Bold', 
-    fontSize: 56, 
-    minWidth: 100,
-    textAlign: 'center'
+  headerTitle: { fontFamily: 'Inter_700Bold', fontSize: 24 },
+  backBtn: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  
+  scrollContent: { paddingHorizontal: 20, paddingTop: 10 },
+  
+  formSection: { marginBottom: 25 },
+  inputLabel: { fontFamily: 'Inter_400Regular', fontSize: 14, color: '#8E8E93', marginBottom: 10 },
+  inputBox: { borderRadius: 12, padding: 16 },
+  mainInput: { fontFamily: 'Inter_400Regular', fontSize: 24 },
+
+  categoryGrid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: 12, 
+    justifyContent: 'space-between' 
   },
-  section: { marginBottom: 30 },
-  sectionTitle: { fontFamily: 'Inter_700Bold', fontSize: 18, marginBottom: 15 },
-  catScroll: { marginHorizontal: -20, paddingHorizontal: 20 },
-  catPill: { 
+  categoryCard: { 
+    width: '48%', 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingHorizontal: 16, 
-    paddingVertical: 10, 
-    borderRadius: 25, 
-    borderWidth: 1, 
-    marginRight: 10,
+    padding: 14, 
+    borderRadius: 14,
     gap: 8
   },
-  catText: { fontFamily: 'Inter_700Bold', fontSize: 13 },
-  noteInput: { 
-    borderRadius: 15, 
-    padding: 18, 
-    fontFamily: 'Inter_400Regular', 
-    fontSize: 15,
-    borderWidth: 1
+  emoji: { fontSize: 18 },
+  categoryName: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
+
+  selectBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 18,
+    borderRadius: 12,
   },
-  balanceInfo: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: 8, 
-    justifyContent: 'center',
-    marginTop: 10
-  },
-  balanceInfoText: { fontFamily: 'Inter_400Regular', fontSize: 13 },
-  footer: { padding: 20, borderTopWidth: 1 },
+  selectText: { fontFamily: 'Inter_400Regular', fontSize: 22 },
+
+  footer: { padding: 20 },
   saveBtn: { 
     paddingVertical: 18, 
-    borderRadius: 20, 
+    borderRadius: 16, 
     alignItems: 'center' 
   },
-  saveBtnText: { fontFamily: 'Inter_700Bold', fontSize: 16 },
+  saveBtnText: { fontFamily: 'Inter_700Bold', fontSize: 18 },
 });
